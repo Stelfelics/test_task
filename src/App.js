@@ -3,6 +3,8 @@ import styled from 'styled-components';
 
 import { useState } from 'react';
 
+import { Routes, Route, Link } from "react-router-dom";
+
 // ============= header
 import Header from './components/Header';
 
@@ -10,10 +12,13 @@ import Header from './components/Header';
 import LeftSide from "./components/LeftSide";
 import RightSide from './components/RightSide';
 
+import SearchByCLick from './components/searchByClick';
+import NotFound from './components/notFound';
+
 // ============= footer
 import Footer from './components/Footer';
 import { useFetch } from "./useFetch";
- 
+
 const App = () => {
 
     // ============================== current tab
@@ -42,6 +47,7 @@ const App = () => {
 
     const lastPaginationIndex = currentPageNumber * needAmountContentPerPage;
     const firstPaginationIndex = lastPaginationIndex - needAmountContentPerPage;
+
     const contentPerPage = (currentTab === "posts" || currentTab === "users") ?
         ({
             fetchedContent: fetchedContent.slice(firstPaginationIndex, lastPaginationIndex),
@@ -64,19 +70,37 @@ const App = () => {
 
     return (
         <AppRoot>
-            <Header setCurrentTab={ setCurrentTab }
-                    currentTab={ currentTab }/>
+            <Header setCurrentTab={setCurrentTab}
+                    currentTab={currentTab}/>
             <Wrapper>
-                <LeftSide contentPerPage={ contentPerPage }
-                          contentParams={{ loading, currentTab }}/>
-                <RightSide processSearch={ processSearch }
-                           currentTab={ currentTab }
-                           setCurrentTab={ setCurrentTab }/>
+
+                <Routes>
+                    <Route path="/"
+                           element={<LeftSide contentPerPage={contentPerPage} contentParams={{loading, currentTab}}/>}/>
+
+                    <Route path="/posts/:id"
+                           element={<LeftSide contentPerPage={contentPerPage} contentParams={{loading, currentTab}}
+                                                   setCurrentTab={setCurrentTab} route="posts" setSearchText={setSearchText}/>}/>
+                    <Route path="/posts/:id"
+                           element={<LeftSide contentPerPage={contentPerPage} contentParams={{loading, currentTab}}
+                                                   setCurrentTab={setCurrentTab} route="users" setSearchText={setSearchText}/>}/>
+
+                    <Route path="/posts"
+                           element={<LeftSide contentPerPage={contentPerPage} contentParams={{loading, currentTab}}/>}/>
+                    <Route path="/users"
+                           element={<LeftSide contentPerPage={contentPerPage} contentParams={{loading, currentTab}}/>}/>
+
+                    <Route path="*" element={<NotFound/>}/>
+                </Routes>
+
+                <RightSide processSearch={processSearch}
+                           currentTab={currentTab}
+                           setCurrentTab={setCurrentTab}/>
             </Wrapper>
-            <Footer amountContentPerPage={ amountContentPerPage }
-                    funcPagination={ paginateContent }
-                    currentPageNumber={ currentPage }
-                    currentTab={ currentTab }/>
+            <Footer amountContentPerPage={amountContentPerPage}
+                    funcPagination={paginateContent}
+                    currentPageNumber={currentPage}
+                    currentTab={currentTab}/>
         </AppRoot>
     );
 }

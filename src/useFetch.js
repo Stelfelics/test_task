@@ -19,7 +19,7 @@ export const useFetch = (setContent, currentTab, setLoading, params = {}) => {
                         setContent(allPosts);
                         setLoading(false); // =======================
 
-                        params.setNeedAmountContentPerPage(5);
+                        params.setNeedAmountContentPerPage(4);
                     })
                     .catch((error) => {
                         console.log(error);
@@ -51,121 +51,160 @@ export const useFetch = (setContent, currentTab, setLoading, params = {}) => {
             getAllUsers();
         } else if (currentTab === "searchPost") {
             if (params) {
-                const id = +params.searchText;
-                if (id) {
-                    const getPost = () => {
 
-                        setLoading(true); // =======================
+                const searchText = params.searchText;
 
-                        axios.get(`https://jsonplaceholder.typicode.com/comments`)
-                            .then((responseAllComments) => {
+                axios.get(`https://jsonplaceholder.typicode.com/posts`)
+                    .then((responsePosts) => {
 
-                                axios.get(`https://jsonplaceholder.typicode.com/posts/${ id }`)
-                                    .then((responsePost) => {
+                        const searchedPost = responsePosts.data;
 
-                                        let contentLength = 0;
-                                        const allComments = responseAllComments.data;
-                                        const searchedPost = responsePost.data;
-                                        let outObj = [];
+                        const filterArrayFunc = () => {
+                            const filteredArray = [];
+                            for (let item in searchedPost) {
 
-                                        searchedPost.bubbleType = "post__searched";
+                                const title = searchedPost[item].title;
+                                const body = searchedPost[item].body;
 
-                                        for (let element in allComments)
-                                            if (allComments[element].postId === id)
-                                                ++contentLength;
+                                if (title.indexOf(searchText) !== -1 || body.indexOf(searchText) !== -1)
+                                    filteredArray.push(searchedPost[item]);
+                            }
 
-                                        outObj.push(
-                                            searchedPost,
-                                            {
-                                                bubbleType: "separator",
-                                                bubbleText: `Комментарии: ${ contentLength }`
+                            return filteredArray;
+                        }
+                        const filteredArray = filterArrayFunc();
+                        const firstFoundPost = filteredArray[0];
+                        if (firstFoundPost) {
+                            const firstFoundPostUserId = firstFoundPost.userId;
+                            const firstFoundPostId = firstFoundPost.id;
+
+                            axios.get(`https://jsonplaceholder.typicode.com/users/${firstFoundPostUserId}`)
+                                .then((responseUser) => {
+                                    axios.get(`https://jsonplaceholder.typicode.com/comments`)
+                                        .then((responseAllComments) => {
+                                            let contentLength = 0;
+                                            const allComments = responseAllComments.data;
+                                            let outObj = [];
+
+                                            const author = responseUser.data.email;
+                                            firstFoundPost.author = author;
+
+                                            firstFoundPost.bubbleType = "post__searched";
+
+                                            for (let element in allComments)
+                                                if (allComments[element].postId === firstFoundPostId)
+                                                    ++contentLength;
+
+                                            outObj.push(
+                                                firstFoundPost,
+                                                {
+                                                    bubbleType: "separator",
+                                                    bubbleText: `Комментарии: ${contentLength}`
+                                                }
+                                            );
+
+                                            for (let element in allComments) {
+                                                if (allComments[element].postId === firstFoundPostId) {
+                                                    allComments[element].bubbleType = "comment";
+                                                    outObj.push(allComments[element]);
+                                                }
                                             }
-                                        );
 
-                                        for (let element in allComments) {
-                                            if (allComments[element].postId === id) {
-                                                allComments[element].bubbleType = "comment";
-                                                outObj.push(allComments[element]);
-                                            }
-                                        }
+                                            params.setSearchResult(outObj);
+                                            setLoading(false); // =======================
 
-                                        params.setSearchResult(outObj);
-                                        setLoading(false); // =======================
+                                            params.setNeedAmountContentPerPage(5);
+                                        })
+                                        .catch((error) => {
+                                            console.log(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                });
+                        }
+                        // ============================================
 
-                                        params.setNeedAmountContentPerPage(6);
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                    });
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            });
-                    }
-                    getPost();
-                } else {
-                    setLoading(true); // ======================= simulate a 404 error
-                }
+                    }).catch((error) => {
+                    console.log(error);
+                });
             }
         } else if (currentTab === "searchUser") {
+
             if (params) {
-                const id = +params.searchText;
-                if (id) {
-                    const getPost = () => {
 
-                        setLoading(true); // =======================
+                const searchText = params.searchText;
 
-                        axios.get(`https://jsonplaceholder.typicode.com/posts`)
-                            .then((responseAllPosts) => {
+                axios.get(`https://jsonplaceholder.typicode.com/users`)
+                    .then((responseUsers) => {
 
-                                axios.get(`https://jsonplaceholder.typicode.com/users/${ id }`)
-                                    .then((responsePost) => {
+                        const searchedUsers = responseUsers.data;
 
-                                        let contentLength = 0;
-                                        const allPosts = responseAllPosts.data;
-                                        const searchedPost = responsePost.data;
-                                        let outObj = [];
+                        const filterArrayFunc = () => {
+                            const filteredArray = [];
+                            for (let item in searchedUsers) {
 
-                                        searchedPost.bubbleType = "user__searched";
+                                const title = searchedUsers[item].name;
+                                const body = searchedUsers[item].email;
 
-                                        for (let element in allPosts)
-                                            if (allPosts[element].userId === id)
-                                                ++contentLength;
+                                if (title.indexOf(searchText) !== -1 || body.indexOf(searchText) !== -1)
+                                    filteredArray.push(searchedUsers[item]);
+                            }
 
-                                        outObj.push(
-                                            searchedPost,
-                                            {
-                                                bubbleType: "separator",
-                                                bubbleText: `Посты пользователя: ${ contentLength }`
-                                            }
-                                        );
+                            return filteredArray;
+                        }
+                        const filteredArray = filterArrayFunc();
+                        const firstFoundUser = filteredArray[0];
+                        if (firstFoundUser) {
 
-                                        for (let element in allPosts) {
-                                            if (allPosts[element].userId === id) {
-                                                allPosts[element].bubbleType = "post";
-                                                outObj.push(allPosts[element]);
-                                            }
+                            const firstFoundUserId = firstFoundUser.id;
+
+                            axios.get(`https://jsonplaceholder.typicode.com/posts`)
+                                .then((responseAllPosts) => {
+                                    let contentLength = 0;
+                                    const allPosts = responseAllPosts.data;
+                                    let outObj = [];
+
+                                    firstFoundUser.bubbleType = "user__searched";
+
+                                    for (let element in allPosts)
+                                        if (allPosts[element].userId === firstFoundUserId)
+                                            ++contentLength;
+
+                                    outObj.push(
+                                        firstFoundUser,
+                                        {
+                                            bubbleType: "separator",
+                                            bubbleText: `Посты пользователя: ${contentLength}`
                                         }
+                                    );
 
-                                        params.setSearchResult(outObj);
-                                        setLoading(false); // =======================
+                                    for (let element in allPosts) {
+                                        if (allPosts[element].userId === firstFoundUserId) {
+                                            allPosts[element].bubbleType = "post";
+                                            outObj.push(allPosts[element]);
+                                        }
+                                    }
 
-                                        params.setNeedAmountContentPerPage(5);
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                    });
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            });
-                    }
-                    getPost();
-                } else {
-                    setLoading(true); // ======================= simulate a 404 error
-                }
+                                    params.setSearchResult(outObj);
+                                    setLoading(false); // =======================
+
+                                    params.setNeedAmountContentPerPage(5);
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                });
+                        }
+                        // ============================================
+
+                    }).catch((error) => {
+                    console.log(error);
+                });
             }
         }
+
+        setLoading(true); // ======================= simulate a 404 error
+
     }, [currentTab, setContent, setLoading]);
 }
 // =====================================================
