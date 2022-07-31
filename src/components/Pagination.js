@@ -7,6 +7,8 @@ const Pagination = ({ amountContentPerPage, funcPagination, currentPageNumber })
         pageNumbers.push(i);
     }
 
+    console.log(amountContentPerPage);
+
     return (
         <div>
             <PaginationList>

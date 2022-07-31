@@ -1,6 +1,8 @@
 import styled from 'styled-components';
-import { PostBubble, Separator, UserBubble, Comment } from "./Bubbles";
+import { PostBubble, Separator, UserBubble, Comment, PostSearchedBubble } from "./Bubbles";
 import Spinner from "./spinner";
+
+import { Link } from "react-router-dom";
 
 const LeftSide = ({ contentPerPage, contentParams }) => {
 
@@ -12,17 +14,19 @@ const LeftSide = ({ contentPerPage, contentParams }) => {
         const bubbleType = bubbleParams.bubbleType;
         if (bubbleType === "post") {
             return (
-                <PostBubble key={ i }
-                            title={ bubbleParams.title }
-                            body={ bubbleParams.body }
-                            href={ `#post_${bubbleParams.id }`}/>
+                <FixedLink key={ i } to={ `/posts/${ bubbleParams.id }` }>
+                    <PostBubble key={ i }
+                                title={ bubbleParams.title }
+                                body={ bubbleParams.body }/>
+                </FixedLink>
             );
         } else if (bubbleType === "user") {
             return (
-                <UserBubble key={ i }
-                            name={ bubbleParams.name }
-                            email={ bubbleParams.email }
-                            href={ `#user_${bubbleParams.id}` }/>
+                <FixedLink key={ i } to={ `/users/${ bubbleParams.id }` }>
+                    <UserBubble key={ i }
+                                name={ bubbleParams.name }
+                                email={ bubbleParams.email }/>
+                </FixedLink>
             );
         } else if (bubbleType === "separator") {
             return (
@@ -31,24 +35,26 @@ const LeftSide = ({ contentPerPage, contentParams }) => {
             );
         } else if (bubbleType === "post__searched") {
             return (
-                <PostBubble key={ i }
-                            title={ bubbleParams.title }
-                            body={ bubbleParams.body }
-                            href={ `#post_${bubbleParams.id}` }/>
+                <FixedLink key={ i } to={ `/posts/${ bubbleParams.id }` }>
+                    <PostSearchedBubble key={ i }
+                                title={ bubbleParams.title }
+                                body={ bubbleParams.body }
+                                author={ bubbleParams.author }/>
+                </FixedLink>
             );
         } else if (bubbleType === "user__searched") {
             return (
-                <UserBubble key={i}
-                            name={ bubbleParams.name }
-                            email={ bubbleParams.email }
-                            href={ `#user_${bubbleParams.id}` }/>
+                <FixedLink key={ i } to={ `/users/${ bubbleParams.id }` }>
+                    <UserBubble key={i}
+                                name={ bubbleParams.name }
+                                email={ bubbleParams.email }/>
+                </FixedLink>
             );
         } else if (bubbleType === "comment") {
             return (
                 <Comment key={i}
                             email={ bubbleParams.email }
-                            body={ bubbleParams.body }
-                            href={ `#user_${ bubbleParams.id }` }/>
+                            body={ bubbleParams.body }/>
             );
         }
     }
@@ -72,6 +78,11 @@ const LeftSide = ({ contentPerPage, contentParams }) => {
 }
 
 export default LeftSide;
+
+const FixedLink = styled(Link)`
+  text-decoration: none;
+  display: block;
+`;
 
 const Loading = styled.div`
   display: flex;

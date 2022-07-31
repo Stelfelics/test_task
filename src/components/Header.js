@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import HeaderLogo from '../images/favicon.svg';
 import { useEffect, useState } from "react";
+import {Link} from "react-router-dom";
 
 const tabsList = [
     {
@@ -19,7 +20,6 @@ const Tabs = ({ items, setCurrentTab }) => {
     const openTab = (e) => {
 
         const btnIndex = Number(e.target.dataset.index);
-
         setActive(btnIndex);
     }
 
@@ -31,14 +31,15 @@ const Tabs = ({ items, setCurrentTab }) => {
         <div>
             {
                 items.map((n, i) => (
-                    <TabItem
-                        href={ `#${ n.href }` }
-                        isActive={ i === active ? 1 : 0 }
-                        onClick={ openTab }
-                        data-index={ i }
-                        key={ i }>
-                        { n.content }
-                    </TabItem>
+                    <FixedLink key={ i } to={ n.href }>
+                        <TabItem
+                            isActive={ i === active ? 1 : 0 }
+                            onClick={ openTab }
+                            data-index={ i }
+                            key={ i }>
+                            { n.content }
+                        </TabItem>
+                    </FixedLink>
                 ))
             }
         </div>
@@ -53,9 +54,11 @@ const Header = ({ setCurrentTab }) => {
                 <Logo>
                     <img src={ HeaderLogo } height="48" width="48" alt=""/>
                 </Logo>
-                <LogoDescription href="#">
-                    logoipsum
-                </LogoDescription>
+                <FixedLink to="/">
+                    <LogoDescription>
+                        logoipsum
+                    </LogoDescription>
+                </FixedLink>
                 <Tabs items={ tabsList }
                       setCurrentTab={ setCurrentTab }/>
             </Content>
@@ -64,6 +67,11 @@ const Header = ({ setCurrentTab }) => {
 }
 
 export default Header;
+
+const FixedLink = styled(Link)`
+  text-decoration: none;
+  display: inline-block;
+`;
 
 const Wrapper = styled.div`
   position: absolute;
@@ -93,8 +101,9 @@ const LogoDescription = styled.div`
   margin-left: 10px;
 `;
 
-const TabItem = styled.a`
+const TabItem = styled.div`
 
+  display: inline-block;
   color: black;
   ${({ isActive }) =>
         isActive ? `color: #208dfc;` : null
